@@ -1,0 +1,37 @@
+---
+- name: Setup the environment
+  
+  hosts: node
+
+  become: true
+
+  tasks:
+    - name: Create a directory app_data
+      file:
+        path: "{{ item }}"
+        state: directory
+      loop: "{{ app_directories }}"
+
+    - name: Create a group nammed app_group
+      group:
+        name: app_group
+        state: present
+
+    - name: Create a user nammed app_user in group app_group
+      user:
+        name: app_user
+        group: app_group
+
+    - name : Create a directory /home/app_user to the user
+      file:
+        path: /home/app_user
+        state: directory
+        owner: app_user
+
+    - name: Set app_user as owner of app_data, app_group as its group and set is mod to 744
+      file:
+        path: "{{ item }}"
+        owner: app_user
+        group: app_group
+        mode: '0744'
+      loop: "{{ app_directories }}"
